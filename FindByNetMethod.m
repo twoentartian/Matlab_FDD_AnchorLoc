@@ -56,6 +56,9 @@ for x = 1:AllSteps
         end
     end
 end
+
+%mesh(Sign_Value);
+
 if X_Maybe_Min==Inf && Y_Maybe_Min==Inf
     fprintf('Success Ratio is Zero, Failed to locate.\n');
     X_FinalPoint = Inf;

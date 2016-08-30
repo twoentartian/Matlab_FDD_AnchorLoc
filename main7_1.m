@@ -17,12 +17,10 @@ noise_power_dB=-144;
 noise_power=10^(noise_power_dB/10);
 
 % Anchor
-%X_A = rand()*2*MapLength - MapLength;
-%Y_A = rand()*2*MapLength - MapLength;
-X_A = 80;
-Y_A = 80;
+X_A = rand()*2*MapLength - MapLength;
+Y_A = rand()*2*MapLength - MapLength;
 
-G_dB_vec = 40:5:41;%Power Gain
+G_dB_vec = 80:5:81;%Power Gain
 G_vec = 10.^(G_dB_vec/10);
 
 % Rx(CLPC)
@@ -237,7 +235,7 @@ for i_G = 1:length(G_dB_vec)
     
     fprintf('Anchor Power: %idB\n',GG);
     % [X_FinalPoint,Y_FinalPoint] = FindByNetMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G );
-	[X_FinalPoint,Y_FinalPoint,X_Rx_Success,Y_Rx_Success] = FindByDiffMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G );
+	[X_FinalPoint,Y_FinalPoint] = FindByDiffMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G );
 	%% Plot
 	figure();
 	hold on;
@@ -246,7 +244,7 @@ for i_G = 1:length(G_dB_vec)
 	plot(X_Tx,Y_Tx,'ob');
 	plot(X_A,Y_A,'og');
 	plot(X_Rx,Y_Rx,'oc');
-    plot(X_Rx_Success,Y_Rx_Success,'ok');
+    plot(X_Rx(Success_Set),Y_Rx(Success_Set),'ok');
 	plot(X_FinalPoint,Y_FinalPoint,'or');
 	grid on;
 end

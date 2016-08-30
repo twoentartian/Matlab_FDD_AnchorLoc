@@ -1,130 +1,129 @@
-function [ X_FinalPoint,Y_FinalPoint,X_Rx_Success,Y_Rx_Success ] = FindByDiffMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G )
+function [ X_FinalPoint,Y_FinalPoint,Success_Set ] = FindByDiffMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G )
 %FINDBYDIFFMETHOD 此处显示有关此函数的摘要
 %   此处显示详细说明
 
 % Diff:dF/dX
-% 2*((2*X_A - 2*X_Tx)/(2*((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2)) + (2*X_A - 2*X_Rx_Success)/(2*((X_A - X_Rx_Success)^2 + (Y_A - Y_Rx_Success)^2)^(1/2)))*(((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2) - Time*c + ((X_A - X_Rx_Success)^2 + (Y_A - Y_Rx_Success)^2)^(1/2))
+% 2*((2*X_A - 2*X_Tx)/(2*((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2)) + (2*X_A - 2*X_Rx(Success_Set(NoRx)))/(2*((X_A - X_Rx(Success_Set(NoRx)))^2 + (Y_A - Y_Rx(Success_Set(NoRx)))^2)^(1/2)))*(((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2) - Times_From_A(Success_Set(NoRx))*c + ((X_A - X_Rx(Success_Set(NoRx)))^2 + (Y_A - Y_Rx(Success_Set(NoRx)))^2)^(1/2));
 % Diff:dF/dY
 % 2*((2*Y_A - 2*Y_Tx)/(2*((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2)) + (2*Y_A - 2*Y_Rx_Success)/(2*((X_A - X_Rx_Success)^2 + (Y_A - Y_Rx_Success)^2)^(1/2)))*(((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2) - Time*c + ((X_A - X_Rx_Success)^2 + (Y_A - Y_Rx_Success)^2)^(1/2))
 
 % Const
 c = 3*10^8;
-
-% Check arguements
-Iteration_Time = 1;
-Iteration_AllSteps = 100;
+Error = 0.0000000000001;
+IterationTime = 1;
 
 %% Success Determine
-X_Rx_Success = Inf(Number_Rx,1);
-Y_Rx_Success = Inf(Number_Rx,1);
+Success_Set = Inf(Number_Rx,1);
 SuccessCounter = 0;
 for NoRx=1:Number_Rx
     if p_d_final(NoRx,i_G)/p_i_r_final(NoRx,i_G) < p_r_final(NoRx,i_G)/p_i_d_final(NoRx,i_G) && Threshold_Time < abs(Times_From_A(NoRx) - Times_From_Tx(NoRx))
-        X_Rx_Success(SuccessCounter + 1) = X_Rx(NoRx);
-        Y_Rx_Success(SuccessCounter + 1) = Y_Rx(NoRx);
         SuccessCounter = SuccessCounter + 1;
+        Success_Set(SuccessCounter) = NoRx;
     end
 end
 
+if SuccessCounter==0
+    fprintf('Success Ratio is Zero, Failed to locate.\n');
+    X_FinalPoint = Inf;
+    Y_FinalPoint = Inf;
+    return;
+end
 
 %% Main
-X_FinalPoint = 0;
-Y_FinalPoint = 0;
-Last_Iteration_Step = MapLength;%the step of base finding
-for i_Iteration_Time = 1:Iteration_Time
-    X_MaybePoints = zeros(Iteration_AllSteps);
-    Y_MaybePoints = zeros(Iteration_AllSteps);
-    for x = 1:Iteration_AllSteps
-        for y = 1:Iteration_AllSteps
-            X_MaybePoints(x,y) = Last_Iteration_Step/(Iteration_AllSteps-1)*(x-1)*2 - Last_Iteration_Step + X_FinalPoint;
-            Y_MaybePoints(x,y) = Last_Iteration_Step/(Iteration_AllSteps-1)*(y-1)*2 - Last_Iteration_Step + Y_FinalPoint;
-        end
+% while(true)
+%     X_FinalPoint = rand()*MapLength*2 - MapLength;
+%     Y_FinalPoint = rand()*MapLength*2 - MapLength;
+%     [dfx,dfy] = find_dfx_dfy(X_FinalPoint,Y_FinalPoint,X_Tx,Y_Tx,X_Rx,Y_Rx,Success_Set,SuccessCounter,Times_From_A,c);
+%     if(abs(dfx)<1 && abs(dfy)<1)
+%         break;
+%     end
+% end
+
+x = -100:1:100;
+y = -100:1:100;
+z = -Inf(length(x),length(y));
+for xTemp = 1:length(x)
+    for yTemp = 1:length(y)
+        z(xTemp,yTemp) = f_Success(x(xTemp),y(yTemp),X_Tx,Y_Tx,X_Rx,Y_Rx,Success_Set,SuccessCounter,Times_From_A,c);
     end
-    
-    Sign_Min = Inf;
-    SignValue = zeros(Iteration_AllSteps);
-    X_SignValue = zeros(Iteration_AllSteps);
-    Y_SignValue = zeros(Iteration_AllSteps);
-    
-    for x = 1:Iteration_AllSteps
-        for y = 1:Iteration_AllSteps
-            for NoRx = 1:SuccessCounter
-                Time = Times_From_A(NoRx);
-                % f = @(X_A,Y_A) (((X_A-X_Rx_Success(NoRx))^2+(Y_A-Y_Rx_Success(NoRx))^2)^0.5 + ((X_A-X_Tx)^2+(Y_A-Y_Tx)^2)^0.5 - Time * c)^2;
-                % dfx = @(X_A,Y_A) 2*((2*X_A - 2*X_Tx)/(2*((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2)) + (2*X_A - 2*X_Rx_Success(NoRx))/(2*((X_A - X_Rx_Success(NoRx))^2 + (Y_A - Y_Rx_Success(NoRx))^2)^(1/2)))*(((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2) - Time*c + ((X_A - X_Rx_Success(NoRx))^2 + (Y_A - Y_Rx_Success(NoRx))^2)^(1/2));
-                % dfy = @(X_A,Y_A) 2*((2*Y_A - 2*Y_Tx)/(2*((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2)) + (2*Y_A - 2*Y_Rx_Success(NoRx))/(2*((X_A - X_Rx_Success(NoRx))^2 + (Y_A - Y_Rx_Success(NoRx))^2)^(1/2)))*(((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2) - Time*c + ((X_A - X_Rx_Success(NoRx))^2 + (Y_A - Y_Rx_Success(NoRx))^2)^(1/2));
-                temp_Diff_X = dfx(X_MaybePoints(x,y),Y_MaybePoints(x,y),X_Tx,Y_Tx,X_Rx_Success,Y_Rx_Success,NoRx,Time,c);
-                temp_Diff_Y = dfy(X_MaybePoints(x,y),Y_MaybePoints(x,y),X_Tx,Y_Tx,X_Rx_Success,Y_Rx_Success,NoRx,Time,c);
-                X_SignValue(x,y) = X_SignValue(x,y) + temp_Diff_X;
-                Y_SignValue(x,y) = Y_SignValue(x,y) + temp_Diff_Y;
-                SignValue(x,y) = X_SignValue(x,y) + Y_SignValue(x,y);
+end
+
+%mesh(z);
+
+X_FinalResult = zeros(IterationTime,1);
+Y_FinalResult = zeros(IterationTime,1);
+for time = 1:IterationTime
+    while(true)
+        X_FinalPoint = rand()*MapLength*2 - MapLength;
+        Y_FinalPoint = rand()*MapLength*2 - MapLength;
+        SuccessSign = false;
+        while(true)
+            Old_X_FinalPoint = X_FinalPoint;
+            Old_Y_FinalPoint = Y_FinalPoint;
+            [dfx,dfy] = find_dfx_dfy(X_FinalPoint,Y_FinalPoint,X_Tx,Y_Tx,X_Rx,Y_Rx,Success_Set,SuccessCounter,Times_From_A,c);
+            f_Value = f_Success(X_FinalPoint,Y_FinalPoint,X_Tx,Y_Tx,X_Rx,Y_Rx,Success_Set,SuccessCounter,Times_From_A,c);
+            stepX = f_Value/dfx;
+            stepY = f_Value/dfy;
+            X_FinalPoint = X_FinalPoint - stepX;
+            Y_FinalPoint = Y_FinalPoint - stepY;
+            if(abs(X_FinalPoint)>MapLength || abs(Y_FinalPoint)>MapLength)
+                SuccessSign = false;
+                break;
             end
-
-            if(abs(SignValue(x,y)) < Sign_Min)
-                X_Min = X_MaybePoints(x,y);
-                Y_Min = Y_MaybePoints(x,y);
-                Sign_Min = abs(SignValue(x,y));
+            
+            ErrorX = (X_FinalPoint-Old_X_FinalPoint)/X_FinalPoint;
+            ErrorY = (Y_FinalPoint-Old_Y_FinalPoint)/Y_FinalPoint;
+            if(ErrorX^2 + ErrorY^2 < Error)
+                X_FinalResult(time) = X_FinalPoint;
+                Y_FinalResult(time) = Y_FinalPoint;
+                SuccessSign = true;
+                break;
             end
         end
-    end
-    
-    %figure();
-    %mesh(X_SignValue);
-    %figure();
-    %mesh(Y_SignValue);
-    
-    X_FinalPoint = X_Min;
-    Y_FinalPoint = Y_Min;
-    Last_Iteration_Step = Last_Iteration_Step*2/(Iteration_AllSteps-1)*2;%the step of Iteration
-    
-    fprintf('X=%f Y=%f\n',X_FinalPoint,Y_FinalPoint);
-end
-disp(X_Check(X_Tx,Y_Tx,X_Rx_Success,Y_Rx_Success,Time,c,SuccessCounter));
-X = linspace(-100,100);
-Y = linspace(-100,100);
-Z = zeros(length(X),length(Y));
-for i_X = 1:length(X)
-    for i_Y = 1:length(Y)
-        for NoRx = 1:SuccessCounter
-            Z(i_X,i_Y) = Z(i_X,i_Y) + f(X(i_X),Y(i_Y),X_Tx,Y_Tx,X_Rx_Success,Y_Rx_Success,NoRx,Time,c);
+        if(SuccessSign)
+            break;
         end
     end
 end
-figure();
-mesh(X,Y,Z);
-xlabel('X');
-ylabel('Y');
+
+
 
 end
 
-function Out = f(X_A,Y_A,X_Tx,Y_Tx,X_Rx_Success,Y_Rx_Success,NoRx,Time,c)
-Out = abs(sqrt((X_A-X_Rx_Success(NoRx))^2+(Y_A-Y_Rx_Success(NoRx))^2) + sqrt((X_A-X_Tx)^2+(Y_A-Y_Tx)^2) - Time * c);
+
+%% Aux Functions
+function [Out_dfx,Out_dfy] = find_dfx_dfy(X_A,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,Success_Set,SuccessCounter,Times_From_A,c)
+Out_dfx = 0;
+Out_dfy = 0;
+for NoRx = 1:SuccessCounter
+    Out_dfx = Out_dfx + dfx(X_A,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,NoRx,Success_Set,Times_From_A,c);
+    Out_dfy = Out_dfy + dfy(X_A,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,NoRx,Success_Set,Times_From_A,c);
+end
+Out_dfx = Out_dfx/SuccessCounter;
+Out_dfy = Out_dfy/SuccessCounter;
 end
 
-function Out = Check_f(X_A,Y_A,X_Tx,Y_Tx,X_Rx_Success,Y_Rx_Success,Time,c,SuccessCounter)
+function Out = f_Success(X_A,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,Success_Set,SuccessCounter,Times_From_A,c)
 Out = 0;
 for NoRx = 1:SuccessCounter
-    Out = Out + f(X_A,Y_A,X_Tx,Y_Tx,X_Rx_Success,Y_Rx_Success,NoRx,Time,c);
+    Out = Out + f(X_A,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,NoRx,Success_Set,Times_From_A,c);
 end
-end
-
-function Out = dfx(X_A,Y_A,X_Tx,Y_Tx,X_Rx_Success,Y_Rx_Success,NoRx,Time,c)
-Out = 2*((2*X_A - 2*X_Tx)/(2*((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)) + (2*X_A - 2*X_Rx_Success(NoRx))/(2*((X_A - X_Rx_Success(NoRx))^2 + (Y_A - Y_Rx_Success(NoRx))^2)^(1/2)))*(((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2) - Time*c + ((X_A - X_Rx_Success(NoRx))^2 + (Y_A - Y_Rx_Success(NoRx))^2)^(1/2));
+Out = Out/SuccessCounter;
 end
 
-function Out = dfy(X_A,Y_A,X_Tx,Y_Tx,X_Rx_Success,Y_Rx_Success,NoRx,Time,c)
-Out = 2*((2*Y_A - 2*Y_Tx)/(2*((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2)) + (2*Y_A - 2*Y_Rx_Success(NoRx))/(2*((X_A - X_Rx_Success(NoRx))^2 + (Y_A - Y_Rx_Success(NoRx))^2)^(1/2)))*(((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2) - Time*c + ((X_A - X_Rx_Success(NoRx))^2 + (Y_A - Y_Rx_Success(NoRx))^2)^(1/2));
+function Out = f(X_A,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,NoRx,Success_Set,Times_From_A,c)
+Time_Temp = (sqrt((X_A-X_Rx(Success_Set(NoRx)))^2+(Y_A-Y_Rx(Success_Set(NoRx)))^2) + sqrt((X_A-X_Tx)^2+(Y_A-Y_Tx)^2))/c;
+Out = (Time_Temp*10^7 - Times_From_A(Success_Set(NoRx))*10^7)^2;
 end
 
-function Out = X_Check(X_Tx,Y_Tx,X_Rx_Success,Y_Rx_Success,Time,c,SuccessCounter)
-Out = 0;
-for NoRx = 1:SuccessCounter
-    Out = Out + 2*((2*80 - 2*X_Tx)/(2*((80 - X_Tx)^2 + (80 - Y_Tx)^2)^(1/2)) + (2*80 - 2*X_Rx_Success(NoRx))/(2*((80 - X_Rx_Success(NoRx))^2 + (80 - Y_Rx_Success(NoRx))^2)^(1/2)))*(((80 - X_Tx)^2 + (80 - Y_Tx)^2)^(1/2) - Time*c + ((80 - X_Rx_Success(NoRx))^2 + (80 - Y_Rx_Success(NoRx))^2)^(1/2));
-end
+function Out = dfx(X_A,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,NoRx,Success_Set,Times_From_A,c)
+%Out = 2*((2*X_A - 2*X_Tx)/(2*((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2)) + (2*X_A - 2*X_Rx(Success_Set(NoRx)))/(2*((X_A - X_Rx(Success_Set(NoRx)))^2 + (Y_A - Y_Rx(Success_Set(NoRx)))^2)^(1/2)))*(((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2) - Times_From_A(Success_Set(NoRx))*c + ((X_A - X_Rx(Success_Set(NoRx)))^2 + (Y_A - Y_Rx(Success_Set(NoRx)))^2)^(1/2));
+delta = 0.00000001;
+Out = (f(X_A + delta,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,NoRx,Success_Set,Times_From_A,c) - f(X_A,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,NoRx,Success_Set,Times_From_A,c))/delta;
 end
 
-function Out = X_Diff(X_A,Y_A,X_Tx,Y_Tx,X_Rx_Success,Y_Rx_Success,NoRx,Time,c)
-Delta = 0.000000001;
-f = @(X_A,Y_A) (((X_A-X_Rx_Success(NoRx))^2+(Y_A-Y_Rx_Success(NoRx))^2)^0.5 + ((X_A-X_Tx)^2+(Y_A-Y_Tx)^2)^0.5 - Time * c)^2;
-Out = (f(X_A+Delta,Y_A) - f(X_A,Y_A))/Delta;
+function Out = dfy(X_A,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,NoRx,Success_Set,Times_From_A,c)
+%Out = 2*((2*Y_A - 2*Y_Tx)/(2*((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2)) + (2*Y_A - 2*Y_Rx(Success_Set(NoRx)))/(2*((X_A - X_Rx(Success_Set(NoRx)))^2 + (Y_A - Y_Rx(Success_Set(NoRx)))^2)^(1/2)))*(((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2) - Times_From_A(Success_Set(NoRx))*c + ((X_A - X_Rx(Success_Set(NoRx)))^2 + (Y_A - Y_Rx(Success_Set(NoRx)))^2)^(1/2));
+delta = 0.00000001;
+Out = (f(X_A,Y_A + delta,X_Tx,Y_Tx,X_Rx,Y_Rx,NoRx,Success_Set,Times_From_A,c) - f(X_A,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,NoRx,Success_Set,Times_From_A,c))/delta;
 end
