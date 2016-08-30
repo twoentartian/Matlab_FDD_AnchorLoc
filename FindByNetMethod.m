@@ -1,4 +1,4 @@
-function [ X_FinalPoint,Y_FinalPoint,X_Rx_Success,Y_Rx_Success ] = FindByNetMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G )
+function [ X_FinalPoint,Y_FinalPoint,Success_Set,SuccessCounter ] = FindByNetMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G )
 %FINDBYNETMETHOD (MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G)
 %   此处显示详细说明
 
@@ -14,14 +14,12 @@ Precision_Iteration_Time = 20;
 Precision_Iteration_AllSteps = 10;
 
 %% Success Determine
-X_Rx_Success = Inf(Number_Rx,1);
-Y_Rx_Success = Inf(Number_Rx,1);
+Success_Set = Inf(Number_Rx,1);
 SuccessCounter = 0;
 for NoRx=1:Number_Rx
     if p_d_final(NoRx,i_G)/p_i_r_final(NoRx,i_G) < p_r_final(NoRx,i_G)/p_i_d_final(NoRx,i_G) && Threshold_Time < abs(Times_From_A(NoRx) - Times_From_Tx(NoRx))
-        X_Rx_Success(SuccessCounter + 1) = X_Rx(NoRx);
-        Y_Rx_Success(SuccessCounter + 1) = Y_Rx(NoRx);
         SuccessCounter = SuccessCounter + 1;
+        Success_Set(SuccessCounter) = NoRx;
     end
 end
 

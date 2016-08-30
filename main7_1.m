@@ -234,8 +234,8 @@ for i_G = 1:length(G_dB_vec)
 	GG = G_dB_vec(i_G);
     
     fprintf('Anchor Power: %idB\n',GG);
-    % [X_FinalPoint,Y_FinalPoint] = FindByNetMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G );
-	[X_FinalPoint,Y_FinalPoint] = FindByDiffMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G );
+    [X_FinalPoint,Y_FinalPoint,Success_Set,SuccessCounter] = FindByNetMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G );
+	%[X_FinalPoint,Y_FinalPoint,Success_Set,SuccessCounter] = FindByDiffMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G );
 	%% Plot
 	figure();
 	hold on;
@@ -244,11 +244,13 @@ for i_G = 1:length(G_dB_vec)
 	plot(X_Tx,Y_Tx,'ob');
 	plot(X_A,Y_A,'og');
 	plot(X_Rx,Y_Rx,'oc');
-    plot(X_Rx(Success_Set),Y_Rx(Success_Set),'ok');
+    for i = 1:SuccessCounter
+        plot(X_Rx(Success_Set(i)),Y_Rx(Success_Set(i)),'ok');
+    end
 	plot(X_FinalPoint,Y_FinalPoint,'or');
 	grid on;
 end
 
 %% Save
-save data;
+%save data;
 	
