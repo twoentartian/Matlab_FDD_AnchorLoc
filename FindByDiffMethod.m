@@ -1,6 +1,10 @@
 function [ X_FinalPoint,Y_FinalPoint,Success_Set,SuccessCounter ] = FindByDiffMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G )
-%FINDBYDIFFMETHOD 此处显示有关此函数的摘要
+%FINDBYDIFFMETHOD Typical time use:8e-02 s
 %   此处显示详细说明
+Time_Measure = false;
+if(Time_Measure)
+    tic;
+end
 
 % Diff:dF/dX
 % 2*((2*X_A - 2*X_Tx)/(2*((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2)) + (2*X_A - 2*X_Rx(Success_Set(NoRx)))/(2*((X_A - X_Rx(Success_Set(NoRx)))^2 + (Y_A - Y_Rx(Success_Set(NoRx)))^2)^(1/2)))*(((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2) - Times_From_A(Success_Set(NoRx))*c + ((X_A - X_Rx(Success_Set(NoRx)))^2 + (Y_A - Y_Rx(Success_Set(NoRx)))^2)^(1/2));
@@ -30,15 +34,6 @@ if SuccessCounter==0
 end
 
 %% Main
-% while(true)
-%     X_FinalPoint = rand()*MapLength*2 - MapLength;
-%     Y_FinalPoint = rand()*MapLength*2 - MapLength;
-%     [dfx,dfy] = find_dfx_dfy(X_FinalPoint,Y_FinalPoint,X_Tx,Y_Tx,X_Rx,Y_Rx,Success_Set,SuccessCounter,Times_From_A,c);
-%     if(abs(dfx)<1 && abs(dfy)<1)
-%         break;
-%     end
-% end
-
 x = -100:1:100;
 y = -100:1:100;
 z = -Inf(length(x),length(y));
@@ -85,9 +80,10 @@ for time = 1:IterationTime
         end
     end
 end
-
-
-
+if(Time_Measure)
+    t = toc;
+    fprintf('Time = %i\n',t);
+end
 end
 
 

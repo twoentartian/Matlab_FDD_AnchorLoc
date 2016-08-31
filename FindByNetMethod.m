@@ -1,7 +1,10 @@
 function [ X_FinalPoint,Y_FinalPoint,Success_Set,SuccessCounter ] = FindByNetMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G )
-%FINDBYNETMETHOD (MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G)
+%FINDBYNETMETHOD Typical time use: 1.0e+00
 %   此处显示详细说明
-
+Time_Measure = false;
+if(Time_Measure)
+    tic;
+end
 % Const
 c = 3*10^8;
 
@@ -40,11 +43,9 @@ Y_Maybe_Min = Inf;
 Sign_Value = zeros(AllSteps,AllSteps);
 for x = 1:AllSteps
     for y = 1:AllSteps
-        for NoRx = 1:Number_Rx
-            if p_d_final(NoRx,i_G)/p_i_r_final(NoRx,i_G) < p_r_final(NoRx,i_G)/p_i_d_final(NoRx,i_G) && Threshold_Time < abs(Times_From_A(NoRx) - Times_From_Tx(NoRx))
-                Time_Temp = (sqrt((X_Tx-X_MaybePoints(x,y))^2 + (Y_Tx-Y_MaybePoints(x,y))^2) + sqrt((X_Rx(NoRx)-X_MaybePoints(x,y))^2 + (Y_Rx(NoRx)-Y_MaybePoints(x,y))^2))/c;
-                Sign_Value(x,y) = Sign_Value(x,y) + (Time_Temp*10^7 - Times_From_A(NoRx)*10^7)^Power_Addition;
-            end
+        for NoRx = 1:SuccessCounter
+            Time_Temp = (sqrt((X_Tx-X_MaybePoints(x,y))^2 + (Y_Tx-Y_MaybePoints(x,y))^2) + sqrt((X_Rx(Success_Set(NoRx))-X_MaybePoints(x,y))^2 + (Y_Rx(Success_Set(NoRx))-Y_MaybePoints(x,y))^2))/c;
+            Sign_Value(x,y) = Sign_Value(x,y) + (Time_Temp*10^7 - Times_From_A(Success_Set(NoRx))*10^7)^Power_Addition;
         end
         Sign_Value(x,y) = Sign_Value(x,y)/SuccessCounter;
         if Sign_Value(x,y) < Min_Sign_Value
@@ -86,11 +87,9 @@ for Iteration_Time = 1:Precision_Iteration_Time
     Sign_Value_Iteration = zeros(Precision_Iteration_AllSteps,Precision_Iteration_AllSteps);
     for x = 1:Precision_Iteration_AllSteps
         for y = 1:Precision_Iteration_AllSteps
-            for NoRx = 1:Number_Rx
-                if p_d_final(NoRx,i_G)/p_i_r_final(NoRx,i_G) < p_r_final(NoRx,i_G)/p_i_d_final(NoRx,i_G) && Threshold_Time < abs(Times_From_A(NoRx) - Times_From_Tx(NoRx))
-                    Time_Temp = (sqrt((X_Tx-X_MaybePoints_Iteration(x,y))^2 + (Y_Tx-Y_MaybePoints_Iteration(x,y))^2) + sqrt((X_Rx(NoRx)-X_MaybePoints_Iteration(x,y))^2 + (Y_Rx(NoRx)-Y_MaybePoints_Iteration(x,y))^2))/c;
-                    Sign_Value_Iteration(x,y) = Sign_Value_Iteration(x,y) + (Time_Temp*10^7 - Times_From_A(NoRx)*10^7)^Power_Addition;
-                end
+            for NoRx = 1:SuccessCounter
+                Time_Temp = (sqrt((X_Tx-X_MaybePoints_Iteration(x,y))^2 + (Y_Tx-Y_MaybePoints_Iteration(x,y))^2) + sqrt((X_Rx(Success_Set(NoRx))-X_MaybePoints_Iteration(x,y))^2 + (Y_Rx(Success_Set(NoRx))-Y_MaybePoints_Iteration(x,y))^2))/c;
+                Sign_Value_Iteration(x,y) = Sign_Value_Iteration(x,y) + (Time_Temp*10^7 - Times_From_A(Success_Set(NoRx))*10^7)^Power_Addition;
             end
             Sign_Value_Iteration(x,y) = Sign_Value_Iteration(x,y)/SuccessCounter;
             if Sign_Value_Iteration(x,y) < Min_Sign_Value
@@ -107,6 +106,9 @@ for Iteration_Time = 1:Precision_Iteration_Time
     X_FinalPoint = X_MaybePoints_Iteration(X_Maybe_Min,Y_Maybe_Min);
     Y_FinalPoint = Y_MaybePoints_Iteration(X_Maybe_Min,Y_Maybe_Min);
 end
-
+if(Time_Measure)
+    t = toc;
+    fprintf('Time = %i\n',t);
+end
 end
 
