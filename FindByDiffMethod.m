@@ -8,7 +8,7 @@ end
 
 % Const
 c = 3*10^8;
-Error = 0.0000000000001;
+Error = 0.00000000001;
 IterationTime = 1;
 
 %% Success Determine
@@ -44,8 +44,9 @@ X_FinalResult = zeros(IterationTime,1);
 Y_FinalResult = zeros(IterationTime,1);
 for time = 1:IterationTime
     while(true)
-        X_FinalPoint = rand()*MapLength*2 - MapLength;
-        Y_FinalPoint = rand()*MapLength*2 - MapLength;
+        X_FinalPoint = rand(1)*2*MapLength - MapLength;
+        Y_FinalPoint = rand(1)*2*MapLength - MapLength;
+        
         SuccessSign = false;
         while(true)
             Old_X_FinalPoint = X_FinalPoint;
@@ -77,10 +78,9 @@ for time = 1:IterationTime
 end
 if(Time_Measure)
     t = toc;
-    fprintf('Diff Method Time = %i\n',t);
+    fprintf('Diff Method Time = %d\n',t);
 end
 end
-
 
 %% Aux Functions
 function [Out_dfx,Out_dfy] = find_dfx_dfy(X_A,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,Success_Set,SuccessCounter,Times_From_A,c)

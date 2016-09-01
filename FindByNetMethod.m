@@ -105,7 +105,7 @@ for Iteration_Time = 1:Precision_Iteration_Time
 end
 if(Time_Measure)
     t = toc;
-    fprintf('Net Method Time = %i\n',t);
+    fprintf('Net Method Time = %d\n',t);
 end
 end
 

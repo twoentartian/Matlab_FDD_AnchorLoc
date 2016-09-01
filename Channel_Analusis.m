@@ -202,7 +202,7 @@ for NoRx=1:Number_Rx
 end
 if(Time_Measure)
     t = toc;
-    fprintf('Channel Analysis Time = %i\n',t);
+    fprintf('Channel Analysis Time = %d\n',t);
 end
 end
 
