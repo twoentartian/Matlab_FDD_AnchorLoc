@@ -1,7 +1,7 @@
 function [ X_FinalPoint,Y_FinalPoint,Success_Set,SuccessCounter ] = FindByNetMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G )
-%FINDBYNETMETHOD Typical time use: 1.0e+00
+%FINDBYNETMETHOD Typical time use: xe-02 s
 %   此处显示详细说明
-Time_Measure = false;
+Time_Measure = true;
 if(Time_Measure)
     tic;
 end
@@ -99,16 +99,13 @@ for Iteration_Time = 1:Precision_Iteration_Time
             end
         end
     end
-    if X_Maybe_Min==Inf && Y_Maybe_Min==Inf
-        error('Impossable math situation!');
-    end
     Last_Iteration_Step = Last_Iteration_Step*2/(Precision_Iteration_AllSteps-1)*2;%the step of Iteration
     X_FinalPoint = X_MaybePoints_Iteration(X_Maybe_Min,Y_Maybe_Min);
     Y_FinalPoint = Y_MaybePoints_Iteration(X_Maybe_Min,Y_Maybe_Min);
 end
 if(Time_Measure)
     t = toc;
-    fprintf('Time = %i\n',t);
+    fprintf('Net Method Time = %i\n',t);
 end
 end
 

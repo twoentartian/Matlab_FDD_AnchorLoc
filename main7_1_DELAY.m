@@ -8,7 +8,7 @@ c = 3*10^8;
 %% Init
 % Map
 MapLength = 100;
-Number_Map = 2;
+Number_Map = 10;
 
 % Check arguements
 AllSteps = 50;
@@ -25,7 +25,7 @@ Delay_Time_Dis = 5;
 Delay_Time = Delay_Time_Dis/c;
 Delay_Time_k = 0.1;
 
-G_dB_vec = 25:5:35;%Power Gain
+G_dB_vec = 25:1:35;%Power Gain
 G_vec = 10.^(G_dB_vec/10);
 
 % Rx(CLPC)

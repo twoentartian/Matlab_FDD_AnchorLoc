@@ -1,15 +1,10 @@
 function [ X_FinalPoint,Y_FinalPoint,Success_Set,SuccessCounter ] = FindByDiffMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G )
-%FINDBYDIFFMETHOD Typical time use:8e-02 s
+%FINDBYDIFFMETHOD Typical time use:xe-02 s or xe-03 s
 %   此处显示详细说明
-Time_Measure = false;
+Time_Measure = true;
 if(Time_Measure)
     tic;
 end
-
-% Diff:dF/dX
-% 2*((2*X_A - 2*X_Tx)/(2*((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2)) + (2*X_A - 2*X_Rx(Success_Set(NoRx)))/(2*((X_A - X_Rx(Success_Set(NoRx)))^2 + (Y_A - Y_Rx(Success_Set(NoRx)))^2)^(1/2)))*(((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2) - Times_From_A(Success_Set(NoRx))*c + ((X_A - X_Rx(Success_Set(NoRx)))^2 + (Y_A - Y_Rx(Success_Set(NoRx)))^2)^(1/2));
-% Diff:dF/dY
-% 2*((2*Y_A - 2*Y_Tx)/(2*((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2)) + (2*Y_A - 2*Y_Rx_Success)/(2*((X_A - X_Rx_Success)^2 + (Y_A - Y_Rx_Success)^2)^(1/2)))*(((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2) - Time*c + ((X_A - X_Rx_Success)^2 + (Y_A - Y_Rx_Success)^2)^(1/2))
 
 % Const
 c = 3*10^8;
@@ -34,16 +29,16 @@ if SuccessCounter==0
 end
 
 %% Main
-x = -100:1:100;
-y = -100:1:100;
-z = -Inf(length(x),length(y));
-for xTemp = 1:length(x)
-    for yTemp = 1:length(y)
-        z(xTemp,yTemp) = f_Success(x(xTemp),y(yTemp),X_Tx,Y_Tx,X_Rx,Y_Rx,Success_Set,SuccessCounter,Times_From_A,c);
-    end
-end
-
-%mesh(z);
+% x = -100:1:100;
+% y = -100:1:100;
+% z = -Inf(length(x),length(y));
+% for xTemp = 1:length(x)
+%     for yTemp = 1:length(y)
+%         z(xTemp,yTemp) = f_Success(x(xTemp),y(yTemp),X_Tx,Y_Tx,X_Rx,Y_Rx,Success_Set,SuccessCounter,Times_From_A,c);
+%     end
+% end
+% 
+% mesh(z);
 
 X_FinalResult = zeros(IterationTime,1);
 Y_FinalResult = zeros(IterationTime,1);
@@ -82,7 +77,7 @@ for time = 1:IterationTime
 end
 if(Time_Measure)
     t = toc;
-    fprintf('Time = %i\n',t);
+    fprintf('Diff Method Time = %i\n',t);
 end
 end
 
@@ -113,13 +108,11 @@ Out = (Time_Temp*10^7 - Times_From_A(Success_Set(NoRx))*10^7)^2;
 end
 
 function Out = dfx(X_A,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,NoRx,Success_Set,Times_From_A,c)
-%Out = 2*((2*X_A - 2*X_Tx)/(2*((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2)) + (2*X_A - 2*X_Rx(Success_Set(NoRx)))/(2*((X_A - X_Rx(Success_Set(NoRx)))^2 + (Y_A - Y_Rx(Success_Set(NoRx)))^2)^(1/2)))*(((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2) - Times_From_A(Success_Set(NoRx))*c + ((X_A - X_Rx(Success_Set(NoRx)))^2 + (Y_A - Y_Rx(Success_Set(NoRx)))^2)^(1/2));
 delta = 0.00000001;
 Out = (f(X_A + delta,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,NoRx,Success_Set,Times_From_A,c) - f(X_A,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,NoRx,Success_Set,Times_From_A,c))/delta;
 end
 
 function Out = dfy(X_A,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,NoRx,Success_Set,Times_From_A,c)
-%Out = 2*((2*Y_A - 2*Y_Tx)/(2*((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2)) + (2*Y_A - 2*Y_Rx(Success_Set(NoRx)))/(2*((X_A - X_Rx(Success_Set(NoRx)))^2 + (Y_A - Y_Rx(Success_Set(NoRx)))^2)^(1/2)))*(((X_A - X_Tx)^2 + (Y_A - Y_Tx)^2)^(1/2) - Times_From_A(Success_Set(NoRx))*c + ((X_A - X_Rx(Success_Set(NoRx)))^2 + (Y_A - Y_Rx(Success_Set(NoRx)))^2)^(1/2));
 delta = 0.00000001;
 Out = (f(X_A,Y_A + delta,X_Tx,Y_Tx,X_Rx,Y_Rx,NoRx,Success_Set,Times_From_A,c) - f(X_A,Y_A,X_Tx,Y_Tx,X_Rx,Y_Rx,NoRx,Success_Set,Times_From_A,c))/delta;
 end

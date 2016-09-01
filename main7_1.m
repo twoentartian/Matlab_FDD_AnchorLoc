@@ -46,9 +46,9 @@ for i_G = 1:length(G_dB_vec)
 	GG = G_dB_vec(i_G);
     
     fprintf('Anchor Power: %idB\n',GG);
+	[X_FinalPoint,Y_FinalPoint,Success_Set,SuccessCounter] = FindByDiffMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G );
     [X_FinalPoint,Y_FinalPoint,Success_Set,SuccessCounter] = FindByNetMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G );
-	%[X_FinalPoint,Y_FinalPoint,Success_Set,SuccessCounter] = FindByDiffMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G );
-	%% Plot
+    %% Plot
 	figure();
 	hold on;
 	axis([-MapLength MapLength -MapLength MapLength]);

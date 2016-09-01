@@ -8,8 +8,8 @@ end
 
 %% Parameters
 sigma_shadowing=4;
-B=300;
-K=300;
+B=30;
+K=30;
 gammaT_dB=10;
 gammaT=10^(gammaT_dB/10);
 noise_power_dB=-144;
@@ -202,7 +202,7 @@ for NoRx=1:Number_Rx
 end
 if(Time_Measure)
     t = toc;
-    fprintf('Time = %i\n',t);
+    fprintf('Channel Analysis Time = %i\n',t);
 end
 end
 
