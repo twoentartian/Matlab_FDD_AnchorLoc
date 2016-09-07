@@ -8,8 +8,9 @@ end
 
 % Const
 c = 3*10^8;
-Error = 0.00000000001;
+Error = 0.000000000001;
 IterationTime = 1;
+AllSteps = 50;
 
 %% Success Determine
 Success_Set = Inf(Number_Rx,1);
@@ -21,12 +22,47 @@ for NoRx=1:Number_Rx
     end
 end
 
-if SuccessCounter==0
+if SuccessCounter == 0
     fprintf('Success Ratio is Zero, Failed to locate.\n');
     X_FinalPoint = Inf;
     Y_FinalPoint = Inf;
     return;
 end
+
+%% Rough Iteration
+X_MaybePoints = zeros(AllSteps);
+Y_MaybePoints = zeros(AllSteps);
+% Generate the Location of Find Points
+for x = 1:AllSteps
+    for y = 1:AllSteps
+        X_MaybePoints(x,y) = MapLength/(AllSteps-1)*(x-1)*2 - MapLength;
+        Y_MaybePoints(x,y) = MapLength/(AllSteps-1)*(y-1)*2 - MapLength;
+    end
+end
+% Find the Minimum Value
+Min_Sign_Value = Inf;
+X_Maybe_Min = Inf;
+Y_Maybe_Min = Inf;
+Sign_Value = zeros(AllSteps,AllSteps);
+for x = 1:AllSteps
+    for y = 1:AllSteps
+        for NoRx = 1:SuccessCounter
+            Time_Temp = (sqrt((X_Tx-X_MaybePoints(x,y))^2 + (Y_Tx-Y_MaybePoints(x,y))^2) + sqrt((X_Rx(Success_Set(NoRx))-X_MaybePoints(x,y))^2 + (Y_Rx(Success_Set(NoRx))-Y_MaybePoints(x,y))^2))/c;
+            Sign_Value(x,y) = Sign_Value(x,y) + (Time_Temp*10^7 - Times_From_A(Success_Set(NoRx))*10^7)^2;
+        end
+        Sign_Value(x,y) = Sign_Value(x,y)/SuccessCounter;
+        if Sign_Value(x,y) < Min_Sign_Value
+            Min_Sign_Value = Sign_Value(x,y);
+            X_Maybe_Min = x;
+            Y_Maybe_Min = y;
+        end
+    end
+end
+
+%mesh(Sign_Value);
+
+X_FinalPoint_AfterRough = X_MaybePoints(X_Maybe_Min,Y_Maybe_Min);
+Y_FinalPoint_AfterRough = Y_MaybePoints(X_Maybe_Min,Y_Maybe_Min);
 
 %% Main
 % x = -100:1:100;
@@ -44,8 +80,8 @@ X_FinalResult = zeros(IterationTime,1);
 Y_FinalResult = zeros(IterationTime,1);
 for time = 1:IterationTime
     while(true)
-        X_FinalPoint = rand(1)*2*MapLength - MapLength;
-        Y_FinalPoint = rand(1)*2*MapLength - MapLength;
+        X_FinalPoint = rand(1)*2*MapLength/AllSteps - MapLength/AllSteps + X_FinalPoint_AfterRough;
+        Y_FinalPoint = rand(1)*2*MapLength/AllSteps - MapLength/AllSteps + Y_FinalPoint_AfterRough;
         
         SuccessSign = false;
         while(true)

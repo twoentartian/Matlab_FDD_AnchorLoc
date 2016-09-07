@@ -13,7 +13,7 @@ MapLength = 100;
 X_A = rand()*2*MapLength - MapLength;
 Y_A = rand()*2*MapLength - MapLength;
 
-G_dB_vec = 40:5:41;%Power Gain
+G_dB_vec = 50:5:51;%Power Gain
 G_vec = 10.^(G_dB_vec/10);
 
 % Rx(slience)
