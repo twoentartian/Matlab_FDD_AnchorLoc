@@ -13,7 +13,10 @@ MapLength = 100;
 X_A = rand()*2*MapLength - MapLength;
 Y_A = rand()*2*MapLength - MapLength;
 
-G_dB_vec = 50:5:51;%Power Gain
+%X_A = 99.1;
+%Y_A = 99.1;
+
+G_dB_vec = 80:5:81;%Power Gain
 G_vec = 10.^(G_dB_vec/10);
 
 % Rx(slience)
@@ -46,8 +49,8 @@ for i_G = 1:length(G_dB_vec)
 	GG = G_dB_vec(i_G);
     
     fprintf('Anchor Power: %ddB\n',GG);
-    [X_FinalPoint,Y_FinalPoint,Success_Set,SuccessCounter] = FindByNetMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G );
-    [X_FinalPoint,Y_FinalPoint,Success_Set,SuccessCounter] = FindByDiffMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G );
+    [ X_FinalPoint,Y_FinalPoint,Success_Set,SuccessCounter,Time ] = FindByNetMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G );
+    [ X_FinalPoint,Y_FinalPoint,Success_Set,SuccessCounter,Time ] = FindByDiffMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G );
     
     %% Plot
 	figure();

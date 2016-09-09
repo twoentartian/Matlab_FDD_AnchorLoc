@@ -1,4 +1,4 @@
-function [ X_FinalPoint,Y_FinalPoint,Success_Set,SuccessCounter ] = FindByDiffMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G )
+function [ X_FinalPoint,Y_FinalPoint,Success_Set,SuccessCounter,Time ] = FindByDiffMethod( MapLength,Number_Rx,p_i_d_final,p_d_final,p_r_final,p_i_r_final,Times_From_A,Times_From_Tx,Threshold_Time,X_Tx,Y_Tx,X_Rx,Y_Rx,i_G )
 %FINDBYDIFFMETHOD Typical time use:xe-02 s or xe-03 s
 %   此处显示详细说明
 Time_Measure = true;
@@ -78,6 +78,7 @@ Y_FinalPoint_AfterRough = Y_MaybePoints(X_Maybe_Min,Y_Maybe_Min);
 
 X_FinalResult = zeros(IterationTime,1);
 Y_FinalResult = zeros(IterationTime,1);
+Counter = 0;
 for time = 1:IterationTime
     while(true)
         X_FinalPoint = rand(1)*2*MapLength/AllSteps - MapLength/AllSteps + X_FinalPoint_AfterRough;
@@ -106,6 +107,12 @@ for time = 1:IterationTime
                 SuccessSign = true;
                 break;
             end
+            if(Counter > 100000)
+                X_FinalPoint = Inf;
+                Y_FinalPoint = Inf;
+                Time = Inf;
+                return;
+            end
         end
         if(SuccessSign)
             break;
@@ -113,8 +120,10 @@ for time = 1:IterationTime
     end
 end
 if(Time_Measure)
-    t = toc;
-    fprintf('Diff Method Time = %d\n',t);
+    Time = toc;
+    fprintf('Diff Method Time = %d\n',Time);
+else
+    Time = Inf;
 end
 end
 
