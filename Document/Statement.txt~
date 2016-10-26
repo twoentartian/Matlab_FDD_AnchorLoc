@@ -1,0 +1,2 @@
+1.Performance Analysis of Layer 1 Relays.pdf 其中讨论了典型的转发延时 5us  另外 仿真中应该包含延时对定位精度的影响（研究）
+2.layer 1 转发是 30dBm ( 1dBm = 10 lg mW) 参考文献Performance Analysis of Layer 1 Relays
